@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://mstprojects-timer.vercel.app</loc>
+    <lastmod>2025-04-20</lastmod> <!-- 마지막 수정 날짜 (필요에 따라 수정) -->
+    <changefreq>daily</changefreq> <!-- 페이지가 변경되는 빈도 (예: daily, weekly, monthly) -->
+    <priority>1.0</priority> <!-- 페이지 우선순위 (0.0에서 1.0 사이) -->
+  </url>
+</urlset>
