@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>타이머</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background-color: #cbeafe;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-size: cover;
+      background-position: center;
+      transition: background 0.3s ease;
+    }
+
+    .container {
+      border: 4px solid black;
+      padding: 20px;
+      border-radius: 30px;
+      background-color: white;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #111827;
+      padding: 10px 20px;
+      border-radius: 10px;
+      background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .timer-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      padding: 20px;
+      border-radius: 15px;
+      background-color: white;
+      border: 2px solid #000;
+    }
+
+    .timer-setup {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    input[type="number"] {
+      width: 70px;
+      padding: 8px;
+      border: 2px solid #93c5fd;
+      border-radius: 8px;
+      font-size: 16px;
+      text-align: center;
+      background-color: white;
+      color: #111827;
+    }
+
+    button {
+      padding: 10px 18px;
+      border: none;
+      background-color: #2563eb;
+      color: white;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    #pauseBtn {
+      background-color: #10b981;
+    }
+
+    #pauseBtn:hover {
+      background-color: #059669;
+    }
+
+    #resetBtn {
+      background-color: #f97316;
+    }
+
+    #resetBtn:hover {
+      background-color: #ea580c;
+    }
+
+    #imageResetBtn {
+      background-color: #ef4444;
+    }
+
+    #imageResetBtn:hover {
+      background-color: #dc2626;
+    }
+
+    #time-display {
+      font-size: 48px;
+      font-weight: bold;
+      color: #111827;
+      margin: 20px 0;
+      background-color: rgba(255,255,255,0.6);
+      padding: 10px 30px;
+      border-radius: 50px;
+      border: 2px solid #93c5fd;
+      display: inline-block;
+    }
+
+    #darkModeContainer {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    #darkModeBtn {
+      padding: 8px 16px;
+      background-color: #000;
+      color: white;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      border: 2px solid #000;
+    }
+
+    #darkModeBtn:hover {
+      background-color: #444;
+    }
+
+    .drop-area {
+      width: 100px;
+      height: 100px;
+      border: 2px dashed #ccc;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: #555;
+      background-color: rgba(255, 255, 255, 0.8);
+      transition: background-color 0.3s;
+    }
+
+    .drop-area.dragover {
+      background-color: #e0f2fe;
+    }
+
+    @media (max-width: 600px) {
+      .timer-setup {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      input[type="number"] {
+        width: 100px;
+      }
+
+      .drop-area {
+        width: 80px;
+        height: 80px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>커스텀 배경 타이머 ⏰</h1>
+
+    <!-- 타이머 입력 및 버튼 -->
+    <div class="timer-container">
+      <div class="timer-setup">
+        <input type="number" id="hours" min="0" placeholder="시" />
+        <input type="number" id="minutes" min="0" placeholder="분" />
+        <input type="number" id="seconds" min="0" placeholder="초" />
+        <button id="startBtn">시작</button>
+        <button id="pauseBtn" style="display: none;">일시정지</button>
+        <button id="resetBtn" style="display: none;">리셋</button>
+        <button id="imageResetBtn">배경 리셋</button>
+      </div>
+    </div>
+
+    <!-- 남은 시간 표시 -->
+    <div id="time-display">00:00:00</div>
+
+    <!-- 다크모드와 그림삽입 나란히 -->
+    <div id="darkModeContainer">
+      <button id="darkModeBtn">다크모드 전환</button>
+      <div class="drop-area" id="dropArea">
+        배경화면을<br>추가 해보세요!
+      </div>
+    </div>
+  </div>
+
+  <audio id="alarmSound" src="my_alarm.mp3" preload="auto"></audio>
+
+  <script>
+    const dropArea = document.getElementById('dropArea');
+    const imageResetBtn = document.getElementById('imageResetBtn');
+
+    dropArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropArea.classList.add('dragover');
+    });
+
+    dropArea.addEventListener('dragleave', () => {
+      dropArea.classList.remove('dragover');
+    });
+
+    dropArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropArea.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          document.body.style.backgroundImage = `url('${e.target.result}')`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    imageResetBtn.addEventListener('click', () => {
+      document.body.style.backgroundImage = '';
+    });
+
+    let interval;
+    let totalSeconds = 0;
+    let isPaused = false;
+
+    const display = document.getElementById('time-display');
+    const startBtn = document.getElementById('startBtn');
+    const pauseBtn = document.getElementById('pauseBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const alarmSound = document.getElementById('alarmSound');
+    const darkModeBtn = document.getElementById('darkModeBtn');
+    let isDarkMode = false;
+
+    function updateDisplay() {
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
+      display.textContent =
+        String(hrs).padStart(2, '0') + ':' +
+        String(mins).padStart(2, '0') + ':' +
+        String(secs).padStart(2, '0');
+    }
+
+    startBtn.addEventListener('click', () => {
+      if (interval) {
+        alert("이미 타이머가 작동 중입니다! 일시정지를 먼저 눌러주세요.");
+        return;
+      }
+
+      const hrs = parseInt(document.getElementById('hours').value) || 0;
+      const mins = parseInt(document.getElementById('minutes').value) || 0;
+      const secs = parseInt(document.getElementById('seconds').value) || 0;
+
+      totalSeconds = hrs * 3600 + mins * 60 + secs;
+      if (totalSeconds <= 0) return;
+
+      updateDisplay();
+      interval = setInterval(() => {
+        if (!isPaused) {
+          totalSeconds--;
+          updateDisplay();
+          if (totalSeconds <= 0) {
+            clearInterval(interval);
+            interval = null;
+            alarmSound.play();
+          }
+        }
+      }, 1000);
+
+      startBtn.style.display = 'none';
+      pauseBtn.style.display = 'inline-block';
+      resetBtn.style.display = 'inline-block';
+    });
+
+    pauseBtn.addEventListener('click', () => {
+      if (!interval) return;
+      isPaused = !isPaused;
+      pauseBtn.textContent = isPaused ? "재시작" : "일시정지";
+    });
+
+    resetBtn.addEventListener('click', () => {
+      clearInterval(interval);
+      interval = null;
+      totalSeconds = 0;
+      updateDisplay();
+      startBtn.style.display = 'inline-block';
+      pauseBtn.style.display = 'none';
+      resetBtn.style.display = 'none';
+      pauseBtn.textContent = "일시정지";
+    });
+
+    darkModeBtn.addEventListener('click', () => {
+      isDarkMode = !isDarkMode;
+      if (isDarkMode) {
+        document.body.style.backgroundColor = '#1f2937';
+        document.body.style.color = '#f3f4f6';
+        darkModeBtn.textContent = "라이트모드 전환";
+      } else {
+        document.body.style.backgroundColor = '#cbeafe';
+        document.body.style.color = '#111827';
+        darkModeBtn.textContent = "다크모드 전환";
+      }
+    });
+  </script>
+</body>
+</html>
